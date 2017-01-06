@@ -27,8 +27,11 @@ func (pr *PR) notify() error {
 	pr.notified = true
 	pr.app.prs[pr.id] = *pr
 
-	reviewer := pr.reviewer()
-	return slack.notify(reviewer, pr.idleMessage())
+	reviewer, err := pr.reviewer()
+	if err != nil {
+		return err
+	}
+	return slack.direct(reviewer, pr.idleMessage())
 }
 
 func (pr *PR) idleMessage() string {
@@ -36,10 +39,12 @@ func (pr *PR) idleMessage() string {
 	return fmt.Sprintf("PR <%s|%d> is idle for %d minutes. Please review. Sincery yours, bot", pr.url, pr.id, minutes)
 }
 
-func (pr *PR) Process() {
+func (pr *PR) process() error {
+	var err error
 	minutes := int(pr.idle().Minutes())
 	fmt.Println(pr.idleMessage())
 	if minutes > 240 {
-		pr.notify()
+		err = pr.notify()
 	}
+	return err
 }

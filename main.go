@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -45,7 +46,10 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				a.Process()
+				err := a.process()
+				if err != nil {
+					fmt.Println(err.Error())
+				}
 			case <-quit:
 				ticker.Stop()
 				return

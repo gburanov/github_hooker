@@ -29,7 +29,7 @@ func (a *App) closePR(number int) {
 	delete(a.prs, number)
 }
 
-func (a *App) Process() {
+func (a *App) process() {
 	for _, pr := range a.prs {
 		if !pr.notified {
 			pr.Process()
