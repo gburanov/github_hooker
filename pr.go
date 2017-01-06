@@ -17,10 +17,18 @@ func (pr *PR) idle() time.Duration {
 	return time.Since(pr.changed)
 }
 
-func (pr *PR) notify() {
-	sendToSlack(pr.idleMessage())
+func (pr *PR) notify() error {
+	slack := Slack{}
+	slack.init()
+	err := slack.broadcast(pr.idleMessage())
+	if err != nil {
+		return err
+	}
 	pr.notified = true
 	pr.app.prs[pr.id] = *pr
+
+	reviewer := pr.reviewer()
+	return slack.notify(reviewer, pr.idleMessage())
 }
 
 func (pr *PR) idleMessage() string {
