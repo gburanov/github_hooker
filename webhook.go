@@ -18,6 +18,9 @@ func webhookHandler(ctx *Context) error {
 	if hook.Event == "pull_request" {
 		processPullRequest(ctx.App, hook.Payload)
 	}
+	if hook.Event == "pull_request_review_comment" {
+		processPullRequestCommit(ctx.App, hook.Payload)
+	}
 	return nil
 }
 
@@ -31,6 +34,21 @@ type PullRequestChange struct {
 }
 
 func processPullRequest(app *App, payload []byte) error {
+	change := PullRequestChange{}
+	err := json.Unmarshal(payload, &change)
+	if err != nil {
+		return err
+	}
+	fmt.Println("What changed " + change.Action)
+	if change.Action == "closed" {
+		app.closePR(change.Pr.Number)
+	} else {
+		app.updatePR(change.Pr.Number)
+	}
+	return nil
+}
+
+func processPullRequestCommit(app *App, payload []byte) error {
 	change := PullRequestChange{}
 	err := json.Unmarshal(payload, &change)
 	if err != nil {

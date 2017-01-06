@@ -28,6 +28,7 @@ func wrap(app *App, mid CntFunc) func(http.ResponseWriter, *http.Request) {
 
 func main() {
 	a := &App{}
+	a.Init()
 	r := mux.NewRouter()
 
 	get := r.Methods("GET").Subrouter()
