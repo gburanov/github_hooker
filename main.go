@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -36,6 +37,20 @@ func main() {
 	post.HandleFunc("/", wrap(a, webhookHandler))
 
 	http.Handle("/", r)
+
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				a.Process()
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 
 	log.Println("Listening port 8080")
 	http.ListenAndServe(":8080", nil)

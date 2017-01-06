@@ -16,7 +16,7 @@ func webhookHandler(ctx *Context) error {
 	}
 	fmt.Println("Processing hook " + hook.Event)
 	if hook.Event == "pull_request" {
-		processPullRequest(hook.Payload)
+		processPullRequest(ctx.App, hook.Payload)
 	}
 	return nil
 }
@@ -30,12 +30,13 @@ type PullRequestChange struct {
 	Pr     PullRequest `json:"pull_request"`
 }
 
-func processPullRequest(payload []byte) error {
+func processPullRequest(app *App, payload []byte) error {
 	change := PullRequestChange{}
 	err := json.Unmarshal(payload, &change)
 	if err != nil {
 		return err
 	}
 	fmt.Println("What changed " + change.Action)
+	app.updatePR(change.Pr.Number)
 	return nil
 }
