@@ -9,11 +9,11 @@ type App struct {
 	prs map[int]PR
 }
 
-func (a App) Init() {
+func (a *App) Init() {
 	a.prs = make(map[int]PR)
 }
 
-func (a App) updatePR(number int) {
+func (a *App) updatePR(number int) {
 	fmt.Printf("Update PR %d\n", number)
 	pr, ok := a.prs[number]
 	if ok == false {
@@ -23,12 +23,12 @@ func (a App) updatePR(number int) {
 	a.prs[number] = pr
 }
 
-func (a App) closePR(number int) {
+func (a *App) closePR(number int) {
 	fmt.Printf("Close PR %d\n", number)
 	delete(a.prs, number)
 }
 
-func (a App) Process() {
+func (a *App) Process() {
 	for _, pr := range a.prs {
 		pr.Process()
 	}

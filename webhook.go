@@ -21,6 +21,9 @@ func webhookHandler(ctx *Context) error {
 	if hook.Event == "pull_request_review_comment" {
 		processPullRequestCommit(ctx.App, hook.Payload)
 	}
+	if hook.Event == "issue_comment" {
+		processIssueComment(ctx.App, hook.Payload)
+	}
 	return nil
 }
 
@@ -56,5 +59,23 @@ func processPullRequestCommit(app *App, payload []byte) error {
 	}
 	fmt.Println("What changed " + change.Action)
 	app.updatePR(change.Pr.Number)
+	return nil
+}
+
+type IssueComment struct {
+	Action string      `json:"action"`
+	Issue  PullRequest `json:"issue"`
+}
+
+func processIssueComment(app *App, payload []byte) error {
+	change := IssueComment{}
+	err := json.Unmarshal(payload, &change)
+	if err != nil {
+		return err
+	}
+	fmt.Println("What changed " + change.Action)
+	if change.Action == "created" {
+		app.updatePR(change.Issue.Number)
+	}
 	return nil
 }
