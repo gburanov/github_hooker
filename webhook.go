@@ -28,7 +28,8 @@ func webhookHandler(ctx *Context) error {
 }
 
 type PullRequest struct {
-	Number int `json:"number"`
+	Number int    `json:"number"`
+	URL    string `json:"html_url"`
 }
 
 type PullRequestChange struct {
@@ -46,7 +47,7 @@ func processPullRequest(app *App, payload []byte) error {
 	if change.Action == "closed" {
 		app.closePR(change.Pr.Number)
 	} else {
-		app.updatePR(change.Pr.Number)
+		app.updatePR(change.Pr.Number, change.Pr.URL)
 	}
 	return nil
 }
@@ -58,13 +59,14 @@ func processPullRequestCommit(app *App, payload []byte) error {
 		return err
 	}
 	fmt.Println("What changed " + change.Action)
-	app.updatePR(change.Pr.Number)
+	app.updatePR(change.Pr.Number, change.Pr.URL)
 	return nil
 }
 
 type IssueComment struct {
 	Action string      `json:"action"`
 	Issue  PullRequest `json:"issue"`
+	URL    string      `json:"html_url"`
 }
 
 func processIssueComment(app *App, payload []byte) error {
@@ -75,7 +77,7 @@ func processIssueComment(app *App, payload []byte) error {
 	}
 	fmt.Println("What changed " + change.Action)
 	if change.Action == "created" {
-		app.updatePR(change.Issue.Number)
+		app.updatePR(change.Issue.Number, change.Issue.URL)
 	}
 	return nil
 }

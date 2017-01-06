@@ -6,27 +6,32 @@ import (
 )
 
 type PR struct {
-	id      int
-	changed time.Time
+	app      *App
+	id       int
+	changed  time.Time
+	url      string
+	notified bool
 }
 
-func (pr PR) idle() time.Duration {
+func (pr *PR) idle() time.Duration {
 	return time.Since(pr.changed)
 }
 
-func (pr PR) notify() {
+func (pr *PR) notify() {
 	sendToSlack(pr.idleMessage())
+	pr.notified = true
+	pr.app.prs[pr.id] = *pr
 }
 
-func (pr PR) idleMessage() string {
+func (pr *PR) idleMessage() string {
 	minutes := int(pr.idle().Minutes())
-	return fmt.Sprintf("PR %d is idle for %d minutes", pr.id, minutes)
+	return fmt.Sprintf("PR <%s|%d> is idle for %d minutes. Please review. Sincery yours, bot", pr.url, pr.id, minutes)
 }
 
-func (pr PR) Process() {
+func (pr *PR) Process() {
 	minutes := int(pr.idle().Minutes())
 	fmt.Println(pr.idleMessage())
-	if minutes > 2 {
+	if minutes > 240 {
 		pr.notify()
 	}
 }
